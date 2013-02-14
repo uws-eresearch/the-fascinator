@@ -73,6 +73,7 @@ public class JythonCacheEntryFactory implements CacheEntryFactory {
     /**
      * Constructs the factory.
      * 
+     *
      * @param portalManager a PortalManager instance
      * @param velocityService a VelocityService instance
      * @param scriptingServices a ScriptingServices instance

@@ -71,6 +71,13 @@ class DetailData:
             return metadata.getList("security_filter")
         else:
             return []
+        
+    def getAllowedGroups(self):
+        metadata = self.getMetadata()
+        if metadata is not None:
+            return metadata.getList("security_filter")
+        else:
+            return []
 
     def getAllPreviews(self):
         list = self.getAltPreviews()
@@ -139,20 +146,28 @@ class DetailData:
     def inPackage(self):
         return self.__inPackage
 
-    def isAccessDenied(self):
+    #def isAccessDenied(self):
         # check if the current user is the record owner
-        if self.getObject() is not None:    
-            current_user = self.page.authentication.get_username()    
-            owner = self.getProperty("owner")
-            if current_user == owner: 
-                return False
+        #if self.getObject() is not None:    
+            #current_user = self.page.authentication.get_username()    
+            #owner = self.getProperty("owner")
+            #if current_user == owner: 
+                #return False
         # check using role-based security
-        myRoles = self.page.authentication.get_roles_list()
-        allowedRoles = self.getAllowedRoles()
-        if myRoles is None or allowedRoles is None:
+        #myRoles = self.page.authentication.get_roles_list()
+        #allowedRoles = self.getAllowedRoles()
+        #if myRoles is None or allowedRoles is None:
+            #return True
+        #for role in myRoles:
+            #if role in allowedRoles:
+     
+    def isAccessDenied(self):   
+        myGroups = self.page.authentication.get_permissions_list()
+        allowedGroups = self.getAllowedGroups()
+        if myGroups is None or allowedGroups is None:
             return True
-        for role in myRoles:
-            if role in allowedRoles:
+        for group in myGroups:
+            if group in allowedGroups:
                 return False
         return True
 

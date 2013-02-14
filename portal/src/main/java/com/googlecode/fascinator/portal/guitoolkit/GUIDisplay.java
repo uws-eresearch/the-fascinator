@@ -25,6 +25,7 @@ import com.googlecode.fascinator.portal.services.DynamicPageService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+
 /**
  * Displays arbitrary content in the portal.
  * 

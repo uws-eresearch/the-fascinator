@@ -2,8 +2,12 @@ target/
 .name
 /.idea
 *.iml
-
 plugins/harvester/filesystem/derby.log
-
 .DS_Store
 *.prefs
+*.project
+*.classpath
+*.pydevproject
+*.class
+*.settings
+*~
