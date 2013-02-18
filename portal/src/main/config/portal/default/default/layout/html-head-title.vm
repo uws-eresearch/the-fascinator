@@ -1,1 +1,1 @@
-<title>#if($pageTitle)$pageTitle#end - $page.portalName - Crate it</title>
+<title>#if($pageTitle)$pageTitle#end - $page.portalName - CrateIt</title>

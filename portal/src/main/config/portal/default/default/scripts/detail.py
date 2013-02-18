@@ -161,7 +161,11 @@ class DetailData:
         #for role in myRoles:
             #if role in allowedRoles:
      
-    def isAccessDenied(self):   
+    def isAccessDenied(self):
+        # Admins always have access
+        if self.page.authentication.is_admin():
+            return False
+           
         myGroups = self.page.authentication.get_permissions_list()
         allowedGroups = self.getAllowedGroups()
         if myGroups is None or allowedGroups is None:
