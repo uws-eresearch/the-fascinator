@@ -31,6 +31,7 @@ class DetailData:
         self.__inPackage = Boolean.parseBoolean(self.formData.get("inPackage", "false"))
         self.__previewPid = None
         self.__hasPid = False
+        self.__isPackage = False
 
         uri = URLDecoder.decode(self.request.getAttribute("RequestURI"))
         matches = re.match("^(.*?)/(.*?)/(?:(.*?)/)?(.*)$", uri)
@@ -58,6 +59,14 @@ class DetailData:
 
             if self.__previewPid:
                 self.__previewPid = URLEncoder.encode(self.__previewPid, "UTF-8")
+                
+            # Check if this object is of type package
+            displayType = self.getMetadata().getFirst("display_type")
+            if ( displayType is not None ) and ( 'package' == displayType ):
+                    self.__isPackage = True
+            else:
+                self.__isPackage = False
+                        
         else:
             # require trailing slash for relative paths
             q = ""
@@ -145,7 +154,7 @@ class DetailData:
 
     def inPackage(self):
         return self.__inPackage
-
+    
     #def isAccessDenied(self):
         # check if the current user is the record owner
         #if self.getObject() is not None:    
@@ -165,15 +174,23 @@ class DetailData:
         # Admins always have access
         if self.page.authentication.is_admin():
             return False
-           
-        myGroups = self.page.authentication.get_permissions_list()
-        allowedGroups = self.getAllowedGroups()
-        if myGroups is None or allowedGroups is None:
-            return True
-        for group in myGroups:
-            if group in allowedGroups:
+        
+        if self.__isPackage:
+            owner = self.__metadata.getFirst("owner")
+            user = self.page.authentication.get_username()
+            if (owner is not None) and (owner == user):
                 return False
-        return True
+            else:
+                return True
+        else:
+            myGroups = self.page.authentication.get_permissions_list()
+            allowedGroups = self.getAllowedGroups()
+            if myGroups is None or allowedGroups is None:
+                return True
+            for group in myGroups:
+                if group in allowedGroups:
+                    return False
+            return True
 
     def isDetail(self):
         return not (self.request.isXHR() or self.__isPreview)
