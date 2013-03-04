@@ -7,8 +7,11 @@ A [release history](release-history.md) is available.
 
 Note: Currently two development projects are beign carried out on the fascinator for CrateIt feature and some customizations related to Mint hence there are two branches called curateit and mint. To build and play with either of them, follow the instructions as mentioned below.
 
+Fascinator Installation
+=======================
+
 Prerequisites
-=============
+-------------
 
   You need to have the Git client, Java 7 and Maven2 (recommended Maven 2.2.1) software installed. On Ubuntu this can be done using apt-get:<br>
   sudo apt-get install git-core openjdk-7-jdk maven2</br>
@@ -48,8 +51,8 @@ Prerequisites
       </activeProfiles>
     </settings>
   
-Fascinator Installation
-=======================
+Installation
+------------
 
 1. First create a directory to keep the repository and switch to it:<br>
    mkdir /opt/fascinator </br><br>
