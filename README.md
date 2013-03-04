@@ -60,7 +60,9 @@ Installation
    cd /opt/fascinator</br>
 2. Clone the-fascinator repository from git@github.com:uws-eresearch/the-fascinator.git:<br>
    git clone git@github.com:uws-eresearch/the-fascinator.git</br>
-3. Build the downloaded source using maven:<br>
+3. Switch to the branch you want to build:<br>
+   git checkout curatelt</br>
+4. Build the downloaded source using maven:<br>
    mvn clean install</br>
   
 This should build the fascinator and once it's successful, start the server using the tf.sh script:<br>
