@@ -56,7 +56,7 @@ Installation
 
 1. First create a directory to keep the repository and switch to it:<br>
    mkdir /opt/fascinator </br><br>
-   chown -R lloyd:lloyd /opt/fascinator</br><br>
+   chown -R $User:$User /opt/fascinator</br><br>
    cd /opt/fascinator</br>
 2. Clone the-fascinator repository from git@github.com:uws-eresearch/the-fascinator.git:<br>
    git clone git@github.com:uws-eresearch/the-fascinator.git</br>
