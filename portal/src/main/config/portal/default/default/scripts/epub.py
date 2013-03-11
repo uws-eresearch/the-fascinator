@@ -1,11 +1,14 @@
 from com.googlecode.fascinator.api.storage import Payload
 from com.googlecode.fascinator.common import JsonSimple
+from com.googlecode.fascinator.api.storage import StorageException
 
 from java.io import ByteArrayOutputStream
 from java.lang import Exception, String
 from java.util.zip import ZipOutputStream, ZipEntry
 
 from org.apache.commons.io import IOUtils
+
+from java.net import URLDecoder
 
 from org.dom4j import QName
 from org.dom4j.io import XMLWriter, OutputFormat, SAXReader
@@ -20,8 +23,8 @@ class EpubData:
 
     def __activate__(self, context):
         self.velocityContext = context
-        self.services = context["Services"]
-        self.log = context["log"]
+        self.services = self.vc("Services")
+        self.log = self.vc("log")
 
         oid = self.vc("formData").get("oid")
         print "--- Creating ePub for: %s ---" % oid
@@ -31,8 +34,9 @@ class EpubData:
             self.__epubcss = None
             self.__orderedItem = []
             self.__itemRefDict = {}
+            self.__object = None
             # get the package manifest
-            object = self.services.getStorage().getObject(oid)
+            object = self.getObject()
             sourceId = object.getSourceId()
             payload = object.getPayload(sourceId)
             self.__manifest = JsonSimple(payload.open())
@@ -55,6 +59,29 @@ class EpubData:
         else:
             self.log.error("ERROR: Requested context entry '" + index + "' doesn't exist")
             return None
+        
+    def getObject(self):
+        if self.__object is None:
+            # Grab the URL
+            req = self.vc("request").getAttribute("RequestURI")
+            uri = URLDecoder.decode(req)
+            # Cut everything down to the OID
+            basePath = self.vc("portalId") + "/" + self.vc("pageName")
+            oid = uri[len(basePath)+1:]
+            # Trim a trailing slash
+            if oid.endswith("/"):
+                oid = oid[:-1]
+
+            # Now get the object
+            if oid is not None:
+                try:
+                    self.__object = self.services.storage.getObject(oid)
+                    return self.__object
+                except StorageException, e:
+                    self.vc("log").error("Failed to retrieve object : " + e.getMessage())
+                    return None
+        return self.__object
+        
 
     def __createEpub(self):
         title = self.__manifest.getString(None, "title")
@@ -155,9 +182,9 @@ class EpubData:
 
             for payloadId in payloadDict:
                 payload, payloadType = payloadDict[payloadId]
+                payloadId = payloadId.lower()
+                zipEntryId = payloadId.replace(" ", "_").replace("\\", "/")
                 if isinstance(payload, Payload):
-                    payloadId = payloadId.lower()
-                    zipEntryId = payloadId.replace(" ", "_").replace("\\", "/")
                     if payloadType == "application/xhtml+xml":
                         zipOutputStream.putNextEntry(ZipEntry("OEBPS/%s" % zipEntryId))
                         ##process the html....
@@ -291,24 +318,37 @@ class EpubData:
             sourcePayload = object.getPayload(pid)
             if sourcePayload and hidden != 'true':
                 payloadType = sourcePayload.contentType
-                htmlPayload = object.getPayload(htmlFileName)
+                htmlPayload = None
+                # Now get the object
+                try:
+                    htmlPayload = object.getPayload(htmlFileName)
+                except StorageException, e:
+                    self.vc("log").error("Failed to retrieve object : " + e.getMessage() + " Creating fake html payload...")
+                htmlPayloadString = """<html xmlns="http://www.w3.org/1999/xhtml"><head><title>%s</title>
+                                        <link rel="stylesheet" href="epub.css"/>
+                                        </head><body><div><span style="color:blue"><a href="%s">%s</a></span></div></body></html>"""
                 process = True
-                if htmlPayload:
-                    #gather all the related payload
-                    payloadDict[nodeHtm] = htmlPayload, "application/xhtml+xml"
-                    payloadList = object.getPayloadIdList()
-                    for payloadid in payloadList:
-                        payload = object.getPayload(payloadid)
-                        if payloadid.find("_files") > -1:
-                            if payload.contentType.startswith("image"):
-                                #hash the name here....
-                                filepath, filename = os.path.split(payload.id)
-                                filename, ext = os.path.splitext(filename)
-                                filename = hashlib.md5(filename).hexdigest()
-                                payloadid = os.path.join("%s" % filepath.lower().replace(" ", "_"), "node-%s%s" % (filename, ext))
-                            payloadDict[payloadid] = payload, payload.contentType
-                #elif sourcePayload:
-                    #for now only works for images
+                if payloadType.startswith("text/plain"):
+                    if htmlPayload:
+                        #gather all the related payload
+                        payloadDict[nodeHtm] = htmlPayload, "application/xhtml+xml"
+                        payloadList = object.getPayloadIdList()
+                        for payloadid in payloadList:
+                            payload = object.getPayload(payloadid)
+                            if payloadid.find("_files") > -1:
+                                if payload.contentType.startswith("image"):
+                                    #hash the name here....
+                                    filepath, filename = os.path.split(payload.id)
+                                    filename, ext = os.path.splitext(filename)
+                                    filename = hashlib.md5(filename).hexdigest()
+                                    payloadid = os.path.join("%s" % filepath.lower().replace(" ", "_"), "node-%s%s" % (filename, ext))
+                                    payloadDict[payloadid] = payload, payload.contentType
+                    else:
+                        htmlPayloadString = htmlPayloadString % (pid, pid.lower().replace(" ", "_"), pid)
+                        payloadDict[pid] = sourcePayload, payloadType
+                        payloadDict[nodeHtm] = IOUtils.toInputStream(htmlPayloadString, "UTF-8"), "application/xhtml+xml"
+                    #elif sourcePayload:
+                        #for now only works for images
                 elif payloadType.startswith("image") and sourcePayload:
                         #hash the file name to avoid invalid id in epub...
                         isImage=True
@@ -316,7 +356,12 @@ class EpubData:
                         ext = os.path.splitext(id)[1]
                         filename = id[id.rfind("/")+1:-len(ext)] #+ ".thumb.jpg"
                         hashedFileName = hashlib.md5(filename).hexdigest()
-                        thumbNailPayload = object.getPayload("%s_thumbnail.jpg" % filename)
+                        thumbNailPayload = None
+                        try:
+                            thumbNailPayload = object.getPayload("%s_thumbnail.jpg" % filename)
+                        except StorageException, e:
+                            self.vc("log").error("Failed to retrieve object : " + e.getMessage() + " Fake html payload will be created...")
+                        
                         htmlString = """<html xmlns="http://www.w3.org/1999/xhtml"><head><title>%s</title>
                                         <link rel="stylesheet" href="epub.css"/>
                                         </head><body><div><span style="display: block"><img src="%s" alt="%s"/></span></div></body></html>"""
@@ -343,4 +388,3 @@ class EpubData:
 
     def __copyString(self, s, out):
         IOUtils.copy(IOUtils.toInputStream(String(s), "UTF-8"), out)
-        
