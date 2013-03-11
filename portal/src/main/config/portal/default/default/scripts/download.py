@@ -110,6 +110,13 @@ class DownloadData:
             return metadata.getList("security_filter")
         else:
             return []
+        
+    def getAllowedGroups(self):
+        metadata = self.getMetadata()
+        if metadata is not None:
+            return metadata.getList("security_filter")
+        else:
+            return []
 
     def getMetadata(self):
         return self.__metadata
@@ -120,13 +127,13 @@ class DownloadData:
             return False
 
         # Check for normal access
-        myRoles = self.page.authentication.get_roles_list()
-        allowedRoles = self.getAllowedRoles()
-        if myRoles is None or allowedRoles is None:
+        myGroups = self.page.authentication.get_permissions_list()
+        allowedGroups = self.getAllowedGroups()
+        if myGroups is None or allowedGroups is None:
             return True
-        for role in myRoles:
-            if role in allowedRoles:
-                return  False
+        for group in myGroups:
+            if group in allowedGroups:
+                return False
         return True
 
     def isDetail(self):
