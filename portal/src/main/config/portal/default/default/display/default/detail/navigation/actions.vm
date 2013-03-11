@@ -24,7 +24,9 @@
         #if($self.hasWorkflowAccess())
           <li><a href="$portalPath/zippackage/$oid">Zip Package...</a></li>
         #end
-        <li><a id="fascinator-epub" href="$portalPath/epub/$oid">ePub...</a></li>
+        #if($parent.isPackage())
+          <li><a id="fascinator-epub" href="$portalPath/epub/$oid">ePub...</a></li>
+        #end
         #parseDisplayTemplate("detail/navigation/custom-actions.vm")
         #if($page.authentication.is_admin())
             <li><a href="$portalPath/history/$oid/">Object History</a></li>

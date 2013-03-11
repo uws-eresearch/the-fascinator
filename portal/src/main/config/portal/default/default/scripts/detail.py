@@ -151,6 +151,9 @@ class DetailData:
 
     def hasPid(self):
         return self.__hasPid
+    
+    def isPackage(self):
+        return self.__isPackage
 
     def inPackage(self):
         return self.__inPackage
