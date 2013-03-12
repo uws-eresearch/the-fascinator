@@ -328,33 +328,30 @@ class EpubData:
                                         <link rel="stylesheet" href="epub.css"/>
                                         </head><body><div><span style="color:blue"><a href="%s">%s</a></span></div></body></html>"""
                 process = True
-                if payloadType.startswith("text/plain"):
-                    if htmlPayload:
-                        #gather all the related payload
-                        payloadDict[nodeHtm] = htmlPayload, "application/xhtml+xml"
-                        payloadList = object.getPayloadIdList()
-                        for payloadid in payloadList:
-                            payload = object.getPayload(payloadid)
-                            if payloadid.find("_files") > -1:
-                                if payload.contentType.startswith("image"):
-                                    #hash the name here....
-                                    filepath, filename = os.path.split(payload.id)
-                                    filename, ext = os.path.splitext(filename)
-                                    filename = hashlib.md5(filename).hexdigest()
-                                    payloadid = os.path.join("%s" % filepath.lower().replace(" ", "_"), "node-%s%s" % (filename, ext))
-                                    payloadDict[payloadid] = payload, payload.contentType
-                    else:
-                        htmlPayloadString = htmlPayloadString % (pid, pid.lower().replace(" ", "_"), pid)
-                        payloadDict[pid] = sourcePayload, payloadType
-                        payloadDict[nodeHtm] = IOUtils.toInputStream(htmlPayloadString, "UTF-8"), "application/xhtml+xml"
-                    #elif sourcePayload:
-                        #for now only works for images
+                if htmlPayload:
+                    #gather all the related payload
+                    payloadDict[nodeHtm] = htmlPayload, "application/xhtml+xml"
+                    payloadList = object.getPayloadIdList()
+                    for payloadid in payloadList:
+                        payload = object.getPayload(payloadid)
+                        if payloadid.find("_files") > -1:
+                            if payload.contentType.startswith("image"):
+                                #hash the name here....
+                                filepath, filename = os.path.split(payload.id)
+                                filename, ext = os.path.splitext(filename)
+                                filename = hashlib.md5(filename).hexdigest()
+                                payloadid = os.path.join("%s" % filepath.lower().replace(" ", "_"), "node-%s%s" % (filename, ext))
+                            payloadDict[payloadid] = payload, payload.contentType
+                elif payloadType.startswith("text/plain"):
+                    htmlPayloadString = htmlPayloadString % (pid, pid.lower().replace(" ", "_"), pid)
+                    payloadDict[pid] = sourcePayload, payloadType
+                    payloadDict[nodeHtm] = IOUtils.toInputStream(htmlPayloadString, "UTF-8"), "application/xhtml+xml"
                 elif payloadType.startswith("image") and sourcePayload:
                         #hash the file name to avoid invalid id in epub...
                         isImage=True
                         #use thumbnail if exist 
-                        ext = os.path.splitext(id)[1]
-                        filename = id[id.rfind("/")+1:-len(ext)] #+ ".thumb.jpg"
+                        ext = os.path.splitext(pid)[1]
+                        filename = pid[pid.rfind("/")+1:-len(ext)] #+ ".thumb.jpg"
                         hashedFileName = hashlib.md5(filename).hexdigest()
                         thumbNailPayload = None
                         try:
