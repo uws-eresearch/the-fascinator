@@ -16,10 +16,6 @@ class IndexData:
         self.utils = context["pyUtils"]
         self.log = context["log"]
 
-	#self.log.info("Varialbes: Index is " + str(self.index) + " object is " + str(self.object) + " payload is "+ str(self.payLoad) + " Params is " + str(self.params) + " and utils is "+ str(self.utils))
-
-	# File permissions
-
         # Common data
         self.__newDoc()
         self.__security()
@@ -73,14 +69,8 @@ class IndexData:
     def __security(self):
         baseFilePath = self.params["base.file.path"]
         path = self.object.getMetadata().getProperty("file.path")
-        pathStr = str(path)
-        if pathStr.startswith(baseFilePath):
-            pathStr = pathStr[len(baseFilePath):]
-            
-        if pathStr.startswith("/"):
-            pathStr = pathStr.lstrip("/")
-        baseDir, rest = pathStr.split("/",1)
-        self.log.info(" Base dir is "+baseDir + " Full path is " + path +" Base path is "+baseFilePath + " File path is "+pathStr)  
+        pathStr = os.path.dirname(path)
+        baseDir = os.path.basename(pathStr)
         self.utils.add(self.index, "security_filter", baseDir)
 	
 
