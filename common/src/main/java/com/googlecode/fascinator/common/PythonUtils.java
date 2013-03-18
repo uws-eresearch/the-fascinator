@@ -19,16 +19,6 @@
 
 package com.googlecode.fascinator.common;
 
-import com.googlecode.fascinator.api.PluginException;
-import com.googlecode.fascinator.api.PluginManager;
-import com.googlecode.fascinator.api.access.AccessControlException;
-import com.googlecode.fascinator.api.access.AccessControlManager;
-import com.googlecode.fascinator.api.access.AccessControlSchema;
-import com.googlecode.fascinator.api.storage.DigitalObject;
-import com.googlecode.fascinator.api.storage.Payload;
-import com.googlecode.fascinator.api.storage.PayloadType;
-import com.googlecode.fascinator.api.storage.StorageException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,6 +55,16 @@ import org.ontoware.rdf2go.model.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.googlecode.fascinator.api.PluginException;
+import com.googlecode.fascinator.api.PluginManager;
+import com.googlecode.fascinator.api.access.AccessControlException;
+import com.googlecode.fascinator.api.access.AccessControlManager;
+import com.googlecode.fascinator.api.access.AccessControlSchema;
+import com.googlecode.fascinator.api.storage.DigitalObject;
+import com.googlecode.fascinator.api.storage.Payload;
+import com.googlecode.fascinator.api.storage.PayloadType;
+import com.googlecode.fascinator.api.storage.StorageException;
+
 /**
  * The purpose of this class is to expose common Java classes and methods we use
  * to Python scripts.
@@ -91,7 +91,12 @@ public class PythonUtils {
     private MessageProducer producer;
     private Map<String, Destination> destinations;
 
+    private JsonSimpleConfig config;
+
     public PythonUtils(JsonSimpleConfig config) throws PluginException {
+
+        this.config = config;
+
         // Security
         String accessControlType = "accessmanager";
         access = PluginManager.getAccessManager(accessControlType);
@@ -105,8 +110,8 @@ public class PythonUtils {
 
         // Message Queues
         String brokerUrl = config.getString(
-                ActiveMQConnectionFactory.DEFAULT_BROKER_BIND_URL,
-                "messaging", "url");
+                ActiveMQConnectionFactory.DEFAULT_BROKER_BIND_URL, "messaging",
+                "url");
         connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
         try {
             connection = connectionFactory.createConnection();
@@ -125,19 +130,17 @@ public class PythonUtils {
     }
 
     // Static lists of mime type substrings used during indexing
-    private static final Set<String> majors = Collections.unmodifiableSet(
-            new HashSet<String>(Arrays.asList(new String[] {
-                "audio", "video", "image"})));
-    private static final Set<String> wordMinors = Collections.unmodifiableSet(
-            new HashSet<String>(Arrays.asList(new String[] {
-                "vnd.ms-word",
-                "vnd.oasis.opendocument.text",
-                "vnd.openxmlformats-officedocument.wordprocessingml"})));
-    private static final Set<String> pptMinors = Collections.unmodifiableSet(
-            new HashSet<String>(Arrays.asList(new String[] {
-                "vnd.ms-powerpoint",
-                "vnd.oasis.opendocument.presentation",
-                "vnd.openxmlformats-officedocument.presentationml"})));
+    private static final Set<String> majors = Collections
+            .unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
+                    "audio", "video", "image" })));
+    private static final Set<String> wordMinors = Collections
+            .unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
+                    "vnd.ms-word", "vnd.oasis.opendocument.text",
+                    "vnd.openxmlformats-officedocument.wordprocessingml" })));
+    private static final Set<String> pptMinors = Collections
+            .unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
+                    "vnd.ms-powerpoint", "vnd.oasis.opendocument.presentation",
+                    "vnd.openxmlformats-officedocument.presentationml" })));
 
     /*****
      * Try to closing any objects that require closure
@@ -260,8 +263,8 @@ public class PythonUtils {
     public Document getXmlDocument(String xmlData) {
         Reader reader = null;
         try {
-            ByteArrayInputStream in = new ByteArrayInputStream(xmlData
-                    .getBytes("utf-8"));
+            ByteArrayInputStream in = new ByteArrayInputStream(
+                    xmlData.getBytes("utf-8"));
             return saxReader.read(in);
         } catch (UnsupportedEncodingException uee) {
         } catch (DocumentException de) {
@@ -382,6 +385,18 @@ public class PythonUtils {
         return model;
     }
 
+    /**
+     * Use top level directory as group name for security in file harvests
+     */
+    public boolean useFolderLevelSecurity() {
+
+        return config.getBoolean(false, "permissions", "useFolderAccess");
+    }
+
+    public String getDefaultAccess() {
+        return config.getString("admin", "permissions", "defaultAccess");
+    }
+
     /*****
      * Return an empty access control schema from the given plugin
      * 
@@ -455,7 +470,7 @@ public class PythonUtils {
     /*****
      * Find the list of roles with access to the given object, but only looking
      * at a single plugin.
-     *
+     * 
      * @param recordId the object to query
      * @param plugin the plugin we are interested in
      * @return List<String> of roles with access to the object
@@ -484,8 +499,9 @@ public class PythonUtils {
     /*****
      * Find the MIME type to use at display time, giving first priority to the
      * preview payload, then to the source payload.
-     *
-     * @param indexerFormats The list of types so far allocated by the rules script.
+     * 
+     * @param indexerFormats The list of types so far allocated by the rules
+     *            script.
      * @param object The object being indexed.
      * @param preview The preview payload
      * @return String The MIME type to be used at display time.
@@ -516,7 +532,7 @@ public class PythonUtils {
     /*****
      * A basic method for selecting common display templates from a given MIME
      * type. This simple algorithm is suitable for most rules files.
-     *
+     * 
      * @param preview The MIME type.
      * @return String The display type.
      */
@@ -562,7 +578,7 @@ public class PythonUtils {
 
     /*****
      * Add the provided key/value pair into the index.
-     *
+     * 
      * @param index : Data structure to add data into
      * @param field : The field name
      * @param value : The value to store
@@ -571,7 +587,7 @@ public class PythonUtils {
         // Adding data
         if (index.containsKey(field)) {
             index.get(field).add(value);
-        // New data
+            // New data
         } else {
             List<String> newList = new ArrayList<String>();
             newList.add(value);
@@ -581,7 +597,7 @@ public class PythonUtils {
 
     /*****
      * Generate a Solr document from a map of provided key/value pairs.
-     *
+     * 
      * @param fields : The lists of evaluated fields for the document
      * @return String : The generated XML snippet
      */
@@ -598,14 +614,16 @@ public class PythonUtils {
 
     /*****
      * Generate an XML snippet representing a key/value pair in a Solr doc.
-     *
+     * 
      * @param field : The field
      * @param value : The value
      * @return String : The generated XML snippet
      */
     public String solrField(String field, String value) {
-        if (field == null || value == null) return null;
-        return "<field name=\"" + field + "\">" +
-                StringEscapeUtils.escapeXml(value) + "</field>";
+        if (field == null || value == null) {
+            return null;
+        }
+        return "<field name=\"" + field + "\">"
+                + StringEscapeUtils.escapeXml(value) + "</field>";
     }
 }

@@ -147,7 +147,7 @@ class AuthenticationData:
             try:
                 if self.current_user is not None:
                     # Otherwise retrieve from the plugin
-                    java_list = self.security.getFilePermissions(self.sessionState, self.current_user)
+                    java_list = self.security.getPermissionsList(self.sessionState, self.current_user)
                     if java_list is not None:
                         for group in java_list:
                             perm_list.append(group)

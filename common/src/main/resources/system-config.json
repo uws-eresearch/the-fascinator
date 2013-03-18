@@ -31,7 +31,9 @@
         }
     },
     "permissions" : {
-		"path" : "${fascinator.home}/security/permissions.json"
+		"path" : "${fascinator.home}/security/permissions.json",
+		"useFolderAccess" : true,
+		"defaultAccess" : "admin"
     },
     "storage": {
         "type": "file-system",

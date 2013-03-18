@@ -75,6 +75,14 @@ public interface PortalSecurityManager {
     public String[] getFilePermissions(JsonSessionState session, User user);
 
     /**
+     * Get permissions list according to configuration
+     * 
+     * @param user The user object of the current user
+     * @return String[] A list of groups, null if no groups found
+     */
+    public String[] getPermissionsList(JsonSessionState session, User user);
+
+    /**
      * Retrieve the details of a user by username
      * 
      * @param username The username of a user to retrieve

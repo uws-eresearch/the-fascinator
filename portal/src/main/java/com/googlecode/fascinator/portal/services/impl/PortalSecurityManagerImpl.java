@@ -305,6 +305,38 @@ public class PortalSecurityManagerImpl implements PortalSecurityManager {
     }
 
     /**
+     * Get permissions list according to configuration
+     * 
+     * @param user The user object of the current user
+     * @return String[] A list of groups, null if no groups found
+     */
+    public String[] getPermissionsList(JsonSessionState session, User user) {
+        // Standard Users
+        GenericUser gUser = (GenericUser) user;
+
+        log.info("I am in getPermissionsList method...");
+
+        boolean useFolderAccess = config.getBoolean(false, "permissions",
+                "useFolderAccess");
+
+        if (useFolderAccess) {
+            String groupStr = permissions.getString(null, gUser.getUsername());
+
+            String[] groups = StringUtils.split(groupStr, ",");
+
+            if (groups != null) {
+                return groups;
+            }
+            return new String[] {};
+        } else {
+            String defAccess = config.getString("admin", "permissions",
+                    "defaultAccess");
+            return new String[] { defAccess };
+        }
+
+    }
+
+    /**
      * Retrieve the details of a user by username
      * 
      * @param username The username of a user to retrieve
