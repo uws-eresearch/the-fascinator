@@ -83,6 +83,14 @@ public interface PortalSecurityManager {
     public String[] getPermissionsList(JsonSessionState session, User user);
 
     /**
+     * Check the access level for the indexed items. Has two levels default and
+     * folder level access
+     * 
+     * @return true if default
+     */
+    public boolean isDirectoryAccessLevel();
+
+    /**
      * Retrieve the details of a user by username
      * 
      * @param username The username of a user to retrieve

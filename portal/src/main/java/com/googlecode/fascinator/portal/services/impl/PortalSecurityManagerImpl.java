@@ -316,10 +316,7 @@ public class PortalSecurityManagerImpl implements PortalSecurityManager {
 
         log.info("I am in getPermissionsList method...");
 
-        boolean useFolderAccess = config.getBoolean(false, "permissions",
-                "useFolderAccess");
-
-        if (useFolderAccess) {
+        if (isDirectoryAccessLevel()) {
             String groupStr = permissions.getString(null, gUser.getUsername());
 
             String[] groups = StringUtils.split(groupStr, ",");
@@ -334,6 +331,16 @@ public class PortalSecurityManagerImpl implements PortalSecurityManager {
             return new String[] { defAccess };
         }
 
+    }
+
+    /**
+     * Check the access level for the indexed items. Has two levels default and
+     * folder level access
+     * 
+     * @return true if default
+     */
+    public boolean isDirectoryAccessLevel() {
+        return config.getBoolean(false, "permissions", "useDirectoryAccess");
     }
 
     /**

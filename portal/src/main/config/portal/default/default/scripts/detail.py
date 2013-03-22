@@ -179,22 +179,30 @@ class DetailData:
             return False
         
         if self.__isPackage:
-            owner = self.__metadata.getFirst("owner")
-            user = self.page.authentication.get_username()
-            if (owner is not None) and (owner == user):
-                return False
-            else:
-                return True
-        else:
-            myGroups = self.page.authentication.get_permissions_list()
-            allowedGroups = self.getAllowedGroups()
-            if myGroups is None or allowedGroups is None:
-                return True
-            for group in myGroups:
-                if group in allowedGroups:
+            if (self.page.authentication.is_directory_access_level()):
+                owner = self.__metadata.getFirst("owner")
+                user = self.page.authentication.get_username()
+                if (owner is not None) and (owner == user):
                     return False
-            return True
+                else:
+                    return True
+            else:
+                self.__getPermissions()
+                    
+        else:
+            self.__getPermissions()
 
+    def __getPermissions(self):
+        myGroups = self.page.authentication.get_permissions_list()
+        allowedGroups = self.getAllowedGroups()
+        if myGroups is None or allowedGroups is None:
+            return True
+        for group in myGroups:
+            if group in allowedGroups:
+                return False
+        return True
+    
+    
     def isDetail(self):
         return not (self.request.isXHR() or self.__isPreview)
 

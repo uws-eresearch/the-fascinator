@@ -32,7 +32,7 @@
     },
     "permissions" : {
 		"path" : "${fascinator.home}/security/permissions.json",
-		"useFolderAccess" : true,
+		"useDirectoryAccess" : true,
 		"defaultAccess" : "admin"
     },
     "storage": {
