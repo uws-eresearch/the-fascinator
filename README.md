@@ -82,3 +82,26 @@ If you have an existing fascinator installation and want to upgrade it to the la
    git checkout curatelt</br>
 5. Build the latest version from source using maven:<br>
    mvn clean install</br>
+
+Fascinator Configuration
+========================
+
+General configuration
+---------------------
+
+For the general configuration of the fascinator go to the [fascinator configuration](https://sites.google.com/site/fascinatorhome/home/documentation/technical/configuration)
+
+File Harvester Configuration
+----------------------------
+1. In system-config.json, locate<br>
+   
+   "permissions" : {
+	"path" : "${fascinator.home}/security/permissions.json",
+	"useDirectoryAccess" : true,
+	"defaultAccess" : "admin"
+    },
+
+   Above section defines the path to the permissions file where users are assigned to various groups to which they have access. When "useDirectoryAccess" is true, 
+   use top level directories in the drive being harvested as group names. When it's false, all the files in the drive are considered as a whole bunch and assign "defaultAccess" value
+   as the group name.
+   
