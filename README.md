@@ -67,3 +67,18 @@ Installation
   
 This should build the fascinator and once it's successful, start the server using the tf.sh script:<br>
   ./tf.sh start</br>
+
+Upgrading
+---------
+
+If you have an existing fascinator installation and want to upgrade it to the latest version, follow the below instructions.
+
+1. Go to fascinator home directory(~/.fascinator in linux platform) and delete the existing system-config.json file
+2. Assuming that the existing repository is used to upgrade, change to that directory:<br>
+   cd /opt/fascinator</br>
+3. Pull the latest version from github:<br>
+   git pull origin curatelt</br>
+4. Switch to the branch you want to build:<br>
+   git checkout curatelt</br>
+5. Build the latest version from source using maven:<br>
+   mvn clean install</br>
