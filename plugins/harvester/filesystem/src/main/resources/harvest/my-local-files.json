@@ -6,6 +6,7 @@
                 {
                     "baseDir": "${user.home}/UWSTest/",
                     "facetDir": "${user.home}/UWSTest/",
+                    "includeFilter": "*.txt",
                     "ignoreFilter": ".svn|.ice|.*|~*|Thumbs.db|.DS_Store",
                     "recursive": true,
                     "force": false,
