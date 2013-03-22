@@ -174,9 +174,6 @@ class AuthenticationData:
         except AccessControlException, e:
             self.error_message = self.parse_error(e)
 
-    def is_directory_access_level(self):
-        return self.security.isDirectoryAccessLevel()
-    
     def get_user(self, username, source):
         try:
             self.active_auth_plugin = source

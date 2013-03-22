@@ -282,12 +282,12 @@ public class PortalSecurityManagerImpl implements PortalSecurityManager {
     }
 
     /**
-     * Get the list of roles possessed by the current user from a json file.
+     * Get the list of groups possessed by the current user from a json file.
      * 
      * @param user The user object of the current user
      * @return String[] A list of groups, null if no groups found
      */
-    public String[] getFilePermissions(JsonSessionState session, User user) {
+    public String[] getPermissionsList(JsonSessionState session, User user) {
 
         // Standard Users
         GenericUser gUser = (GenericUser) user;
@@ -300,7 +300,7 @@ public class PortalSecurityManagerImpl implements PortalSecurityManager {
             return groups;
         }
 
-        return null;
+        return new String[] {};
 
     }
 
@@ -310,13 +310,15 @@ public class PortalSecurityManagerImpl implements PortalSecurityManager {
      * @param user The user object of the current user
      * @return String[] A list of groups, null if no groups found
      */
-    public String[] getPermissionsList(JsonSessionState session, User user) {
+    public String[] getFilePermissions(JsonSessionState session, User user) {
         // Standard Users
         GenericUser gUser = (GenericUser) user;
 
         log.info("I am in getPermissionsList method...");
 
-        if (isDirectoryAccessLevel()) {
+        boolean useDirAccess = config.getBoolean(false, "permissions",
+                "useDirectoryAccess");
+        if (useDirAccess) {
             String groupStr = permissions.getString(null, gUser.getUsername());
 
             String[] groups = StringUtils.split(groupStr, ",");
@@ -331,16 +333,6 @@ public class PortalSecurityManagerImpl implements PortalSecurityManager {
             return new String[] { defAccess };
         }
 
-    }
-
-    /**
-     * Check the access level for the indexed items. Has two levels default and
-     * folder level access
-     * 
-     * @return true if default
-     */
-    public boolean isDirectoryAccessLevel() {
-        return config.getBoolean(false, "permissions", "useDirectoryAccess");
     }
 
     /**
