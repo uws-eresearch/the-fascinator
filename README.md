@@ -102,6 +102,6 @@ File Harvester Configuration
     },
 
    Above section defines the path to the permissions file where users are assigned to various groups to which they have access. When "useDirectoryAccess" is true, 
-   use top level directories in the drive being harvested as group names. When it's false, all the files in the drive are considered as a whole bunch and assign "defaultAccess" value
+   use top level directory names in the drive being harvested as group names. When it's false, all the files in the drive are considered as a whole bunch and assign "defaultAccess" value
    as the group name.
    
