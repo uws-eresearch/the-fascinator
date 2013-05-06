@@ -130,8 +130,10 @@ class FacetTreeData:
         req.addParam("fq", 'item_type:"object"')
 
         # Make sure 'fq' has already been set in the session
-        security_roles = self.auth.get_roles_list();
-        security_query = 'security_filter:("' + '" OR "'.join(security_roles) + '")'
+        #security_roles = self.auth.get_roles_list();
+        #security_query = 'security_filter:("' + '" OR "'.join(security_roles) + '")'
+        permissions = self.auth.get_permissions_list();
+        security_query = 'security_filter:("' + '" OR "'.join(permissions) + '")'
         req.addParam("fq", security_query)
 
         out = ByteArrayOutputStream()
