@@ -355,6 +355,7 @@ class IndexData:
             baseDir = "/%s/" % baseDir[baseDir.rfind("/")+1:]
             filePath = filePath.replace("\\", "/").replace(baseFilePath, baseDir)
         self.__indexPath("file_path", filePath, False)
+        self.utils.add(self.index, "full_path", filePath)
 	
 
     def __displayType(self):

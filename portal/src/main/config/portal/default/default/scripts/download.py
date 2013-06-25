@@ -59,10 +59,10 @@ class DownloadData:
         #print "URI='%s' OID='%s' PID='%s'" % (uri, object.getId(), payload.getId())
 
         # Security check
-        if self.isAccessDenied():
+        #if self.isAccessDenied():
             # Redirect to the object page for standard access denied error
-            self.response.sendRedirect(context["portalPath"] + "/detail/" + object.getId())
-            return
+            #self.response.sendRedirect(context["portalPath"] + "/detail/" + object.getId())
+            #return
 
         ## The byte range cache will check for byte range requests first
         self.cache = self.services.getByteRangeCache()
