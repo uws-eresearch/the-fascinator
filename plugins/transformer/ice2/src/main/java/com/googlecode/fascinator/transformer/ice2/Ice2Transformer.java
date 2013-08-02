@@ -44,9 +44,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -499,7 +496,7 @@ public class Ice2Transformer implements Transformer {
                     // to the 'body' tag and replace with a 'div'
                     if (mimeType.equals(HTML_MIME_TYPE)) {
                         try {
-                            log.debug("Stripping unnecessary HTML");
+                            /*log.debug("Stripping unnecessary HTML");
                             // Parse the document
                             Document doc = reader.loadDocumentFromStream(in);
                             // Alter the body node
@@ -511,9 +508,9 @@ public class Ice2Transformer implements Transformer {
                             reader.docToStream(node, out);
                             // Prep our inputstream again
                             in = new ByteArrayInputStream(out.toByteArray());
-                        } catch (DocumentException ex) {
+                            } catch (DocumentException ex) {
                             createErrorPayload(object, name, ex);
-                            continue;
+                            continue;*/
                         } catch (Exception ex) {
                             log.error("Error : ", ex);
                             continue;
