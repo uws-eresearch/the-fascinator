@@ -1,5 +1,6 @@
 import time
 import urllib
+import hashlib
 
 from com.googlecode.fascinator.api.storage import StorageException
 
@@ -338,6 +339,7 @@ class IndexData:
     def __filePath(self):
         baseFilePath = self.params["base.file.path"]
         filePath = self.object.getMetadata().getProperty("file.path")
+        self.utils.add(self.index, "full_path", hashlib.md5(filePath).hexdigest())
         if baseFilePath:
             # NOTE: need to change again if the json file accept forward
             #       slash in windows
@@ -346,8 +348,6 @@ class IndexData:
             baseDir = "/%s/" % baseDir[baseDir.rfind("/")+1:]
             filePath = filePath.replace("\\", "/").replace(baseFilePath, baseDir)
         self.__indexPath("file_path", filePath, False)
-        filePath = urllib.quote(unicode(filePath).encode("utf-8"), safe="~()*!.\'")
-        self.utils.add(self.index, "full_path", filePath)
 
     def __displayType(self):
         # check the object metadata for display type set by harvester or transformer
