@@ -12,6 +12,7 @@
                     "link": true
                 }
             ],
+            "owncloud": true,
             "caching": "basic",
             "cacheId": "default"
         }

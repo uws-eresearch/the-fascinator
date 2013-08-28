@@ -20,9 +20,11 @@ package com.googlecode.fascinator.harvester.filesystem;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -40,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import com.googlecode.fascinator.api.harvester.HarvesterException;
 import com.googlecode.fascinator.api.storage.DigitalObject;
 import com.googlecode.fascinator.api.storage.StorageException;
+import com.googlecode.fascinator.common.JsonObject;
 import com.googlecode.fascinator.common.JsonSimple;
 import com.googlecode.fascinator.common.harvester.impl.GenericHarvester;
 import com.googlecode.fascinator.common.storage.StorageUtils;
@@ -272,6 +275,17 @@ public class FileSystemHarvester extends GenericHarvester {
     }
 
     /**
+     * File filter used to get directories
+     */
+    private class DirectoryFilter implements FileFilter {
+
+        @Override
+        public boolean accept(File path) {
+            return path.isDirectory();
+        }
+    }
+
+    /**
      * File System Harvester Constructor
      */
     public FileSystemHarvester() {
@@ -285,11 +299,55 @@ public class FileSystemHarvester extends GenericHarvester {
      */
     @Override
     public void init() throws HarvesterException {
+
         // Check for valid targests
         targets = getJsonConfig().getJsonSimpleList("harvester", "file-system",
                 "targets");
+
         if (targets.isEmpty()) {
             throw new HarvesterException("No targets specified");
+        }
+        // Add new config option, spawn targets for all sub dir's if OC exists
+        boolean isOwncloud = getJsonConfig().getBoolean(false, "harvester",
+                "file-system", "owncloud");
+
+        if (isOwncloud) {
+            // Iterate over all targets. make targets for each sub folder. Add
+            // them to targets list
+            List<JsonSimple> newTargets = new ArrayList<JsonSimple>();
+            Iterator<JsonSimple> itr = targets.iterator();
+            while (itr.hasNext()) {
+                JsonSimple target = itr.next();
+                String path = target.getString(null, "baseDir");
+                if (path == null) {
+                    log.warn("No path provided for target, skipping!");
+                } else {
+                    File file = new File(path);
+                    if (!file.exists()) {
+                        log.warn("Path '{}' does not exist, skipping!", path);
+                    } else if (file.isDirectory()) {
+                        log.info("Target file/directory found: '{}'", path);
+                        File[] childDirectories = file
+                                .listFiles(new DirectoryFilter());
+                        for (File child : childDirectories) {
+                            JsonObject clone = (JsonObject) target
+                                    .getJsonObject().clone();
+                            clone.remove("baseDir");
+                            clone.remove("facetDir");
+                            clone.put("baseDir", child.getAbsolutePath()
+                                    + "/files/");
+                            clone.put("facetDir", child.getAbsolutePath()
+                                    + "/files/");
+                            JsonSimple childTarget = new JsonSimple(clone);
+                            newTargets.add(childTarget);
+                        }
+                    }
+                }
+            }
+            if (!newTargets.isEmpty()) {
+                targets.addAll(newTargets);
+                targets.retainAll(newTargets);
+            }
         }
 
         // Loop processing variables
